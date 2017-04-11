@@ -1,0 +1,20 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "LRtTHQqNcd9umzNIYzlrf1+LNLw=",
+			"path": "github.com/healthimation/go-client/client",
+			"revision": "e5e1228e261daa7a214e9bc54337c087fd24a2a0",
+			"revisionTime": "2017-02-21T20:03:13Z"
+		},
+		{
+			"checksumSHA1": "OW3EGsqxewcIbnLwPCP3dz1aE7U=",
+			"origin": "github.com/healthimation/go-pushy/vendor/github.com/healthimation/go-glitch/glitch",
+			"path": "github.com/healthimation/go-glitch/glitch",
+			"revision": "b74b40d8260493f6083d4f5cc37442311b2646d0",
+			"revisionTime": "2017-02-17T18:06:35Z"
+		}
+	],
+	"rootPath": "github.com/healthimation/go-pushy"
+}
