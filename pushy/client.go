@@ -20,8 +20,8 @@ const (
 
 // Client can make requests to the pushy api
 type Client interface {
-	PushToDevices(ctx context.Context, tokens []string, data interface{}, options *PushOptions) glitch.DataError
-	PushToTopic(ctx context.Context, topic string, data interface{}, options *PushOptions) glitch.DataError
+	PushToDevices(ctx context.Context, tokens []string, data interface{}, options *PushOptions) (*string, glitch.DataError)
+	PushToTopic(ctx context.Context, topic string, data interface{}, options *PushOptions) (*string, glitch.DataError)
 }
 
 type pushyClient struct {
@@ -37,7 +37,7 @@ func NewClient(apiKey string, timeout time.Duration) Client {
 	}
 }
 
-func (p *pushyClient) PushToDevices(ctx context.Context, tokens []string, data interface{}, options *PushOptions) glitch.DataError {
+func (p *pushyClient) PushToDevices(ctx context.Context, tokens []string, data interface{}, options *PushOptions) (*string, glitch.DataError) {
 	bodyObj := pushRequest{
 		Tokens: tokens,
 		Data:   data,
@@ -46,7 +46,7 @@ func (p *pushyClient) PushToDevices(ctx context.Context, tokens []string, data i
 	return p.push(ctx, bodyObj, options)
 }
 
-func (p *pushyClient) PushToTopic(ctx context.Context, topic string, data interface{}, options *PushOptions) glitch.DataError {
+func (p *pushyClient) PushToTopic(ctx context.Context, topic string, data interface{}, options *PushOptions) (*string, glitch.DataError) {
 	if !strings.HasPrefix(topic, "/topics/") {
 		topic = "/topics/" + topic
 	}
@@ -59,7 +59,7 @@ func (p *pushyClient) PushToTopic(ctx context.Context, topic string, data interf
 	return p.push(ctx, bodyObj, options)
 }
 
-func (p *pushyClient) push(ctx context.Context, bodyObj pushRequest, options *PushOptions) glitch.DataError {
+func (p *pushyClient) push(ctx context.Context, bodyObj pushRequest, options *PushOptions) (*string, glitch.DataError) {
 	slug := "push"
 	h := http.Header{}
 	h.Set("Content-type", "application/json")
@@ -74,7 +74,7 @@ func (p *pushyClient) push(ctx context.Context, bodyObj pushRequest, options *Pu
 
 	body, err := client.ObjectToJSONReader(bodyObj)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	query := url.Values{}
@@ -84,11 +84,11 @@ func (p *pushyClient) push(ctx context.Context, bodyObj pushRequest, options *Pu
 
 	err = p.c.Do(ctx, http.MethodPost, slug, query, h, body, res)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if res.Error != nil {
-		return glitch.NewDataError(nil, ErrorAPI, *res.Error)
+		return nil, glitch.NewDataError(nil, ErrorAPI, *res.Error)
 	}
-	return nil
+	return res.ID, nil
 }

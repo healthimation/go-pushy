@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"reflect"
+
 	"github.com/healthimation/go-client/client"
 )
 
@@ -41,14 +43,15 @@ func makeStrPtr(v string) *string {
 func TestUnit_PushToDevices(t *testing.T) {
 
 	type testcase struct {
-		name            string
-		handler         http.HandlerFunc
-		timeout         time.Duration
-		ctx             context.Context
-		tokens          []string
-		data            interface{}
-		options         *PushOptions
-		expectedErrCode *string
+		name             string
+		handler          http.HandlerFunc
+		timeout          time.Duration
+		ctx              context.Context
+		tokens           []string
+		data             interface{}
+		options          *PushOptions
+		expectedErrCode  *string
+		expectedResponse *string
 	}
 
 	testcases := []testcase{
@@ -57,20 +60,22 @@ func TestUnit_PushToDevices(t *testing.T) {
 			handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprint(w, `{"success":true, "id":"5742ea5dacf3a92e17ba7126"}`)
 			}),
-			timeout: 5 * time.Second,
-			ctx:     context.Background(),
-			tokens:  []string{"1", "2", "3"},
-			data:    map[string]string{"foo": "bar"},
+			timeout:          5 * time.Second,
+			ctx:              context.Background(),
+			tokens:           []string{"1", "2", "3"},
+			data:             map[string]string{"foo": "bar"},
+			expectedResponse: makeStrPtr("5742ea5dacf3a92e17ba7126"),
 		},
 		{
 			name: "alternate path - with options",
 			handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprint(w, `{"success":true, "id":"5742ea5dacf3a92e17ba7126"}`)
 			}),
-			timeout: 5 * time.Second,
-			ctx:     context.Background(),
-			tokens:  []string{"1", "2", "3"},
-			data:    map[string]string{"foo": "bar"},
+			timeout:          5 * time.Second,
+			ctx:              context.Background(),
+			tokens:           []string{"1", "2", "3"},
+			data:             map[string]string{"foo": "bar"},
+			expectedResponse: makeStrPtr("5742ea5dacf3a92e17ba7126"),
 			options: &PushOptions{
 				ContentAvailable: makeBoolPtr(true),
 				MutableContent:   makeBoolPtr(true),
@@ -110,7 +115,7 @@ func TestUnit_PushToDevices(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			c, ts := testClient(tc.handler, tc.timeout)
 			defer ts.Close()
-			err := c.PushToDevices(tc.ctx, tc.tokens, tc.data, tc.options)
+			ret, err := c.PushToDevices(tc.ctx, tc.tokens, tc.data, tc.options)
 			if tc.expectedErrCode != nil || err != nil {
 				if tc.expectedErrCode == nil {
 					t.Fatalf("Unexpected error occurred (%#v)", err)
@@ -121,6 +126,9 @@ func TestUnit_PushToDevices(t *testing.T) {
 				if err.Code() != *tc.expectedErrCode {
 					t.Fatalf("Actual error (%#v) did not match expected (%#v)", err.Code(), tc.expectedErrCode)
 				}
+				if !reflect.DeepEqual(tc.expectedResponse, ret) {
+					t.Fatalf("Actual response (%#v) did not match expected (%#v)", ret, tc.expectedResponse)
+				}
 			}
 		})
 	}
@@ -129,14 +137,15 @@ func TestUnit_PushToDevices(t *testing.T) {
 func TestUnit_PushToTopic(t *testing.T) {
 
 	type testcase struct {
-		name            string
-		handler         http.HandlerFunc
-		timeout         time.Duration
-		ctx             context.Context
-		topic           string
-		data            interface{}
-		options         *PushOptions
-		expectedErrCode *string
+		name             string
+		handler          http.HandlerFunc
+		timeout          time.Duration
+		ctx              context.Context
+		topic            string
+		data             interface{}
+		options          *PushOptions
+		expectedErrCode  *string
+		expectedResponse *string
 	}
 
 	testcases := []testcase{
@@ -145,20 +154,22 @@ func TestUnit_PushToTopic(t *testing.T) {
 			handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprint(w, `{"success":true, "id":"5742ea5dacf3a92e17ba7126"}`)
 			}),
-			timeout: 5 * time.Second,
-			ctx:     context.Background(),
-			topic:   "foobar",
-			data:    map[string]string{"foo": "bar"},
+			timeout:          5 * time.Second,
+			ctx:              context.Background(),
+			topic:            "foobar",
+			data:             map[string]string{"foo": "bar"},
+			expectedResponse: makeStrPtr("5742ea5dacf3a92e17ba7126"),
 		},
 		{
 			name: "alternate path - with options",
 			handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprint(w, `{"success":true, "id":"5742ea5dacf3a92e17ba7126"}`)
 			}),
-			timeout: 5 * time.Second,
-			ctx:     context.Background(),
-			topic:   "foobar",
-			data:    map[string]string{"foo": "bar"},
+			timeout:          5 * time.Second,
+			ctx:              context.Background(),
+			topic:            "foobar",
+			data:             map[string]string{"foo": "bar"},
+			expectedResponse: makeStrPtr("5742ea5dacf3a92e17ba7126"),
 			options: &PushOptions{
 				ContentAvailable: makeBoolPtr(true),
 				MutableContent:   makeBoolPtr(true),
@@ -174,10 +185,11 @@ func TestUnit_PushToTopic(t *testing.T) {
 			handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprint(w, `{"success":true, "id":"5742ea5dacf3a92e17ba7126"}`)
 			}),
-			timeout: 5 * time.Second,
-			ctx:     context.Background(),
-			topic:   "/topics/foobar",
-			data:    map[string]string{"foo": "bar"},
+			timeout:          5 * time.Second,
+			ctx:              context.Background(),
+			topic:            "/topics/foobar",
+			data:             map[string]string{"foo": "bar"},
+			expectedResponse: makeStrPtr("5742ea5dacf3a92e17ba7126"),
 			options: &PushOptions{
 				ContentAvailable: makeBoolPtr(true),
 				MutableContent:   makeBoolPtr(true),
@@ -217,7 +229,7 @@ func TestUnit_PushToTopic(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			c, ts := testClient(tc.handler, tc.timeout)
 			defer ts.Close()
-			err := c.PushToTopic(tc.ctx, tc.topic, tc.data, tc.options)
+			ret, err := c.PushToTopic(tc.ctx, tc.topic, tc.data, tc.options)
 			if tc.expectedErrCode != nil || err != nil {
 				if tc.expectedErrCode == nil {
 					t.Fatalf("Unexpected error occurred (%#v)", err)
@@ -227,6 +239,9 @@ func TestUnit_PushToTopic(t *testing.T) {
 				}
 				if err.Code() != *tc.expectedErrCode {
 					t.Fatalf("Actual error (%#v) did not match expected (%#v)", err.Code(), tc.expectedErrCode)
+				}
+				if !reflect.DeepEqual(tc.expectedResponse, ret) {
+					t.Fatalf("Actual response (%#v) did not match expected (%#v)", ret, tc.expectedResponse)
 				}
 			}
 		})
