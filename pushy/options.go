@@ -2,10 +2,10 @@ package pushy
 
 // PushOptions holds all the optional settings for a push notification
 type PushOptions struct {
-	TimeToLive       *int64
-	Notification     *NotificationOptions
-	ContentAvailable *bool
-	MutableContent   *bool
+	TimeToLive       *int64               `json:"time_to_live"`
+	Notification     *NotificationOptions `json:"notification"`
+	ContentAvailable *bool                `json:"content_available"`
+	MutableContent   *bool                `json:"mutable_content"`
 }
 
 // NotificationOptions contains the iOS optional arguments for sending push notifications
