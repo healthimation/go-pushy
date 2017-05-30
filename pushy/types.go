@@ -6,7 +6,7 @@ type pushRequest struct {
 	Tokens           []string             `json:"tokens,omitempty"`
 	TimeToLive       *int64               `json:"time_to_live,omitempty"`
 	Notification     *NotificationOptions `json:"notification,omitempty"`
-	ContentAvailable *bool                `json:"content_avaiable,omitempty"`
+	ContentAvailable *bool                `json:"content_available,omitempty"`
 	MutableContent   *bool                `json:"mutable_content,omitempty"`
 }
 
